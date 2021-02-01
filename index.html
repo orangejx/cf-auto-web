@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cloudflare CDN 加/减速节点</title>
+<!--    <script src="https://cdnjs-cloudflare-com.ora.wang/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>-->
+<!--    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">-->
+<!--    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>-->
+<!--    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-LCPyFKQyML7mqtS+4XytolfqyqSlcbB3bvDuH9vX2sdQMxRonb/M3b9EmhCNNNrV" crossorigin="anonymous"></script>-->
+    <script src="js/jquery-3.5.1.js"></script>
+    <link rel="stylesheet" href="./css/bootstrap.css">
+    <link rel="stylesheet" href="./css/bootstrap-grid.css">
+    <link rel="stylesheet" href="./css/bootstrap-reboot.css">
+<!--    <script src="./js/bootstrap.js"></script>-->
+    <script src="./js/dot.min.js"></script>
+
+</head>
+<body>
+<script>
+
+    // 公共变量
+    let domain      =   'cf-auto.0jn.net'; // 域名
+    let url         =   'https://'+domain+'/'; // URL
+    let trace       =   '/cdn-cgi/trace'; // 当前 CDN Trace 数据
+    let info        =   'info.php'; // 当前请求数据
+    let node        =   'node.json'; // CDN 节点数据
+    let arrTrace    =   ['colo','fl','gateway','h','http','ip','loc','sni','tls','ts','uag','visit_scheme','warp']; // Trace 包含信息
+    let arrTrAlive  =   ['colo','h','http','ip','loc','tls','uag','visit_scheme','warp']; // 使用的 Trace 信息
+    let arrInfo     =   ['HTTP_CDN_LOOP','HTTP_CF_CONNECTING_IP','HTTP_CF_IPCOUNTRY','HTTP_CF_RAY','HTTP_CF_VISITOR','HTTP_X_FORWARDED_FOR']; // 请求返回数据
+    let nsType      =   {'1':'A','2':'NS','5':'CNAME','6':'SOA','16':'TXT','28':'AAAA'}; // NS 类型
+
+    function getNode() {
+        // 获取 Cloudflare CDN 节点信息
+        $.getJSON(node,function (result) {
+            $('#cdn-data').data('cdn-node',result)
+        })
+    }
+
+    function getInfo() {
+        // 查询当前请求信息
+        $.get(info,function (result) {
+            $('#cdn-data').data('cdn-info',result)
+        })
+    }
+
+    function getTrace(){
+        // 查询当前 CDN 节点 Trace 信息
+        let resArrN =   new Array();
+        $.ajax({
+            url: url+trace,
+            type: 'get',
+            data: null,
+            cache:false,
+            async:false,
+            success:function(result){
+                let resArr  =   result.split(/[\r\n]+/);
+                // resArr.forEach((item,index)=>{
+                //     if(!item)
+                //         resArr.splice(index,1); //删除空项
+                // })
+                resArr.forEach((item,index)=>{
+                    let tmp_item = item.split('=');
+                    if (tmp_item.length == 2)
+                        resArrN[tmp_item[0]]    =   tmp_item[1];
+                })
+            }
+        })
+        $('#cdn-data').data('cdn-cgi-trace',resArrN)
+        $.each(arrTrace,function (key,value) {
+            if ($('#cdn-data').data('cdn-cgi-trace')[value] == null || $('#cdn-data').data('cdn-cgi-trace')[value] == undefined)
+                $('#cdn-data').data('cdn-cgi-trace')[value] = '获取失败~';
+        })
+    }
+
+    function setTrace() {
+        getTrace();
+        setTimeout(function () {
+            $.each(arrTrAlive,function (key,value) {
+                $('.trace-'+value).text($('#cdn-data').data('cdn-cgi-trace')[value]);
+            })
+            $(".refresh-cdn-cgi-trace svg").removeClass('refresh-click');
+        },200)
+    }
+
+    function getDNS() {
+        // 查询 A 记录
+        $.ajax({
+            url: 'https://dns.alidns.com/resolve?name='+domain+'&type=1',
+            type: 'get',
+            data: null,
+            cache:false,
+            async:false,
+            success:function(result){
+                $('#cdn-data').data('cdn-dns',[]);
+                if (result['Answer'] != undefined && result['Answer'].length != undefined && result['Answer'].length > 0)
+                    $('#cdn-data').data('cdn-dns',result['Answer']);
+            }
+        })
+        let cDNS =  [];
+        $.each($('#cdn-data').data('cdn-dns'),function (key,item) {
+            cDNS[key] = item;
+            if (item['type'] != undefined && nsType[item['type']] != undefined)
+                cDNS[key]['type']   =   nsType[item['type']];
+        })
+        $('#cdn-data').data('c-dns',cDNS);
+    }
+    
+    function setDNS() {
+        getDNS();
+        setTimeout(function () {
+            if ($('#cdn-data').data('c-dns').length < 1){
+                $(".tbody-cdn-dns").html('<tr><td>暂未获取到结果~</td></tr>');
+            }else {
+                let arrText = doT.template($("#tpl-cdn-dns").text());
+                $(".tbody-cdn-dns").html(arrText($('#cdn-data').data('c-dns')));
+            }
+            $(".refresh-cdn-dns svg").removeClass('refresh-click');
+        },100)
+    }
+    
+    function getDNS6() {
+        // 查询 AAAA 记录
+        $.ajax({
+            url: 'https://dns.alidns.com/resolve?name='+domain+'&type=28',
+            type: 'get',
+            data: null,
+            cache:false,
+            async:false,
+            success:function(result){
+                $('#cdn-data').data('cdn-dns6',[]);
+                if (result['Answer'] != undefined && result['Answer'].length != undefined && result['Answer'].length > 0)
+                    $('#cdn-data').data('cdn-dns6',result['Answer']);
+            }
+        })
+        let cDNS6 =  [];
+        $.each($('#cdn-data').data('cdn-dns6'),function (key,item) {
+            cDNS6[key] = item;
+            if (item['type'] != undefined && nsType[item['type']] != undefined)
+                cDNS6[key]['type']   =   nsType[item['type']];
+        })
+        $('#cdn-data').data('c-dns6',cDNS6);
+    }
+    
+    function setDNS6() {
+        getDNS6();
+        setTimeout(function () {
+            if ($('#cdn-data').data('c-dns6').length < 1){
+                $(".tbody-cdn-dns6").html('<tr><td>暂未获取到结果~</td></tr>');
+            }else {
+                let arrText = doT.template($("#tpl-cdn-dns").text());
+                $(".tbody-cdn-dns6").html(arrText($('#cdn-data').data('c-dns6')));
+            }
+            $(".refresh-cdn-dns6 svg").removeClass('refresh-click');
+        },100)
+    }
+    
+    function start() {
+        $(".refresh-cdn-dns svg").click();
+        $(".refresh-cdn-dns6 svg").click();
+        $(".refresh-cdn-cgi-trace svg").click();
+    }
+
+    $(function (){
+        $(".refresh-cdn-dns svg").click(function () {
+            $(this).addClass("refresh-click");
+            $(".tbody-cdn-dns").html('<tr><td>获取ing...</td></tr>');
+            setDNS();
+        })
+        $(".refresh-cdn-dns6 svg").click(function () {
+            $(this).addClass("refresh-click");
+            $(".tbody-cdn-dns6").html('<tr><td>获取ing...</td></tr>');
+            setDNS6();
+        })
+        $(".refresh-cdn-cgi-trace svg").click(function () {
+            $(this).addClass("refresh-click");
+            $.each(arrTrAlive,function (key,value) {
+                $('.trace-'+value).text('获取ing...');
+            })
+            setTrace();
+        })
+        start();
+    })
+</script>
+<style>
+    .refresh{
+        cursor: pointer;
+    }
+    .refresh-click{
+        -webkit-transition-property: -webkit-transform;
+        -webkit-transition-duration: 1s;
+        -moz-transition-property: -moz-transform;
+        -moz-transition-duration: 1s;
+        -webkit-animation: rotate 1s linear infinite;
+        -moz-animation: rotate 1s linear infinite;
+        -o-animation: rotate 1s linear infinite;
+        animation: rotate 1s linear infinite;
+    }
+    .display-flex{
+        display: flex;
+    }
+    @-webkit-keyframes rotate{from{-webkit-transform: rotate(0deg)}
+        to{-webkit-transform: rotate(360deg)}
+    }
+    @-moz-keyframes rotate{from{-moz-transform: rotate(0deg)}
+        to{-moz-transform: rotate(359deg)}
+    }
+    @-o-keyframes rotate{from{-o-transform: rotate(0deg)}
+        to{-o-transform: rotate(359deg)}
+    }
+    @keyframes rotate{from{transform: rotate(0deg)}
+        to{transform: rotate(359deg)}
+    }
+</style>
+    <div id="app">
+        <div class="container title" style="margin: 6% auto;">
+            <div class="row">
+                <div class="col align-self-center">
+                    <h1 class="text-center display-4">Cloudflare CDN 加/减速节点<br>(不保证速度)</h1>
+                </div>
+            </div>
+        </div>
+        <div class="container cdn-dns" style="margin: 2% auto;">
+            <p class="h4">IPv4 解析情况
+                <span class="refresh refresh-cdn-dns" title="刷新">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/></svg>
+                </span>
+            </p>
+            <table class="table table-cdn-dns">
+                <thead>
+                    <tr>
+                        <th scope="col-2">#</th>
+                        <th scope="col-2">Type</th>
+                        <th scope="col-2">Name</th>
+                        <th scope="col-2">Value</th>
+                        <th scope="col-2">TTL</th>
+                    </tr>
+                </thead>
+                <tbody class="tbody-cdn-dns"><tr><td>空</td></tr></tbody>
+            </table>
+        </div>
+        <div class="container cdn-dns6" style="margin: 2% auto;">
+            <p class="h4">IPv6 解析情况
+                <span class="refresh refresh-cdn-dns6" title="刷新">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/></svg>
+                </span>
+            </p>
+            <table class="table table-cdn-dns6">
+                <thead>
+                    <tr>
+                        <th scope="col-2">#</th>
+                        <th scope="col-2">Type</th>
+                        <th scope="col-2">Name</th>
+                        <th scope="col-2">Value</th>
+                        <th scope="col-2">TTL</th>
+                    </tr>
+                </thead>
+                <tbody class="tbody-cdn-dns6"><tr><td>空</td></tr></tbody>
+            </table>
+        </div>
+        <div class="container cdn-cgi-trace" style="margin: 2% auto;">
+            <p class="h4">当前CDN节点信息
+                <span class="refresh refresh-cdn-cgi-trace" title="刷新">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/></svg>
+                </span>
+            </p>
+            <table class="table table-cdn-cgi-trace table-hover table-bordered table-striped">
+                <thead>
+                <tr class="display-flex">
+                    <th class="col-2">Type</th>
+                    <th class="col-10">Value</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr class="display-flex">
+                    <th class="col-2">节点</th>
+                    <td class="col-10 trace-tr trace-colo">-</td>
+                </tr>
+                <tr class="display-flex">
+                    <th class="col-2">主机名</th>
+                    <td class="col-10 trace-tr trace-h">-</td>
+                </tr>
+                <tr class="display-flex">
+                    <th class="col-2">HTTP 版本</th>
+                    <td class="col-10 trace-tr trace-http">-</td>
+                </tr>
+                <tr class="display-flex">
+                    <th class="col-2">您的 IP 地址</th>
+                    <td class="col-10 trace-tr trace-ip">-</td>
+                </tr>
+                <tr class="display-flex">
+                    <th class="col-2">您的位置</th>
+                    <td class="col-10 trace-tr trace-loc">-</td>
+                </tr>
+                <tr class="display-flex">
+                    <th class="col-2">TLS 版本</th>
+                    <td class="col-10 trace-tr trace-tls">-</td>
+                </tr>
+                <tr class="display-flex">
+                    <th class="col-2">User Agent</th>
+                    <td class="col-10 trace-tr trace-uag">-</td>
+                </tr>
+                <tr class="display-flex">
+                    <th class="col-2">访问协议</th>
+                    <td class="col-10 trace-tr trace-visit_scheme">-</td>
+                </tr>
+                <tr class="display-flex">
+                    <th class="col-2">Warp</th>
+                    <td class="col-10 trace-tr trace-warp">-</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script id="tpl-cdn-dns" type="text/x-dot-template">
+        {{~it:value:index}}
+            <tr>
+                <th scope="row">{{=index+1}}</th>
+                <td>{{=value.type}}</td>
+                <td>{{=value.name}}</td>
+                <td>{{=value.data}}</td>
+                <td>{{=value.TTL}}</td>
+            </tr>
+        {{~}}
+    </script>
+
+    <div id="cdn-data"></div>
+</body>
+</html>
