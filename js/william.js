@@ -19,15 +19,29 @@ let nsType      =   {'1':'A','2':'NS','5':'CNAME','6':'SOA','16':'TXT','28':'AAA
 
 function getNode() {
     // 获取 Cloudflare CDN 节点信息
-    $.getJSON(node,function (result) {
-        $('#cdn-data').data('cdn-node',result)
+    $.ajax({
+        url: node,
+        type: 'get',
+        data: null,
+        cache:false,
+        async:false,
+        success:function(result){
+            $('#cdn-data').data('cdn-node',result)
+        }
     })
 }
 
 function getInfo() {
     // 查询当前请求信息
-    $.get(info,function (result) {
-        $('#cdn-data').data('cdn-info',result)
+    $.ajax({
+        url: info,
+        type: 'get',
+        data: null,
+        cache:false,
+        async:false,
+        success:function(result){
+            $('#cdn-data').data('cdn-info',result)
+        }
     })
 }
 
@@ -35,7 +49,7 @@ function getTrace(){
     // 查询当前 CDN 节点 Trace 信息
     let resArrN =   new Array();
     $.ajax({
-        url: url+trace,
+        url: trace,
         type: 'get',
         data: null,
         cache:false,
@@ -58,6 +72,14 @@ function getTrace(){
         if ($('#cdn-data').data('cdn-cgi-trace')[value] == null || $('#cdn-data').data('cdn-cgi-trace')[value] == undefined)
             $('#cdn-data').data('cdn-cgi-trace')[value] = '获取失败~';
     })
+    getNode();
+    $.each($('#cdn-data').data('cdn-node'),function (key,item) {
+        if (item[$('#cdn-data').data('cdn-cgi-trace')['colo']] != undefined && item[$('#cdn-data').data('cdn-cgi-trace')['colo']] != null && item[$('#cdn-data').data('cdn-cgi-trace')['colo']] != ''){
+            $('#cdn-data').data('cdn-cgi-trace')['colo'] = item[$('#cdn-data').data('cdn-cgi-trace')['colo']] + ' - ' + key;
+            return false; // 相当于 break
+        }
+    })
+
 }
 
 function setTrace() {
