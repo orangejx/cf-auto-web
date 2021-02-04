@@ -16,9 +16,9 @@ let arrTrace        =   ['colo','fl','gateway','h','http','ip','loc','sni','tls'
 let arrTrAlive      =   ['colo','h','http','ip','loc','tls','uag','visit_scheme','warp']; // 使用的 Trace 信息
 let arrInfo         =   ['HTTP_CDN_LOOP','HTTP_CF_CONNECTING_IP','HTTP_CF_IPCOUNTRY','HTTP_CF_RAY','HTTP_CF_VISITOR','HTTP_X_FORWARDED_FOR','REMOTE_ADDR']; // 请求返回数据
 let nsType          =   {'1':'A','2':'NS','5':'CNAME','6':'SOA','16':'TXT','28':'AAAA'}; // NS 类型
-let sDNSTimeout     =   400; // setDNS Timeout [ms]
-let sDNS6Timeout    =   400; // setDNS6 Timeout [ms]
-let sTraceTimeout   =   600; // setTrace Timeout [ms]
+let sDNSTimeout     =   50; // setDNS Timeout [ms]
+let sDNS6Timeout    =   50; // setDNS6 Timeout [ms]
+let sTraceTimeout   =   100; // setTrace Timeout [ms]
 
 function getNode() {
     // 获取 Cloudflare CDN 节点信息
