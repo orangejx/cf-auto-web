@@ -7,15 +7,18 @@
  */
 
 // 公共变量
-let domain      =   'cf-auto.0jn.net'; // 域名
-let url         =   'https://'+domain+'/'; // URL
-let trace       =   '/cdn-cgi/trace'; // 当前 CDN Trace 数据
-let info        =   'info.php'; // 当前请求数据
-let node        =   'node.json'; // CDN 节点数据
-let arrTrace    =   ['colo','fl','gateway','h','http','ip','loc','sni','tls','ts','uag','visit_scheme','warp']; // Trace 包含信息
-let arrTrAlive  =   ['colo','h','http','ip','loc','tls','uag','visit_scheme','warp']; // 使用的 Trace 信息
-let arrInfo     =   ['HTTP_CDN_LOOP','HTTP_CF_CONNECTING_IP','HTTP_CF_IPCOUNTRY','HTTP_CF_RAY','HTTP_CF_VISITOR','HTTP_X_FORWARDED_FOR']; // 请求返回数据
-let nsType      =   {'1':'A','2':'NS','5':'CNAME','6':'SOA','16':'TXT','28':'AAAA'}; // NS 类型
+let domain          =   'cf-auto.0jn.net'; // 域名
+let url             =   'https://'+domain+'/'; // URL
+let trace           =   '/cdn-cgi/trace'; // 当前 CDN Trace 数据
+let info            =   'info.php'; // 当前请求数据
+let node            =   'node.json'; // CDN 节点数据
+let arrTrace        =   ['colo','fl','gateway','h','http','ip','loc','sni','tls','ts','uag','visit_scheme','warp']; // Trace 包含信息
+let arrTrAlive      =   ['colo','h','http','ip','loc','tls','uag','visit_scheme','warp']; // 使用的 Trace 信息
+let arrInfo         =   ['HTTP_CDN_LOOP','HTTP_CF_CONNECTING_IP','HTTP_CF_IPCOUNTRY','HTTP_CF_RAY','HTTP_CF_VISITOR','HTTP_X_FORWARDED_FOR','REMOTE_ADDR']; // 请求返回数据
+let nsType          =   {'1':'A','2':'NS','5':'CNAME','6':'SOA','16':'TXT','28':'AAAA'}; // NS 类型
+let sDNSTimeout     =   400; // setDNS Timeout [ms]
+let sDNS6Timeout    =   400; // setDNS6 Timeout [ms]
+let sTraceTimeout   =   600; // setTrace Timeout [ms]
 
 function getNode() {
     // 获取 Cloudflare CDN 节点信息
@@ -84,12 +87,14 @@ function getTrace(){
 
 function setTrace() {
     getTrace();
+    getInfo();
     setTimeout(function () {
         $.each(arrTrAlive,function (key,value) {
             $('.trace-'+value).text($('#cdn-data').data('cdn-cgi-trace')[value]);
         })
+        $('.info-REMOTE_ADDR').text($('#cdn-data').data('cdn-info')['REMOTE_ADDR']);
         $(".refresh-cdn-cgi-trace svg").removeClass('refresh-click');
-    },200)
+    },sTraceTimeout)
 }
 
 function getDNS() {
@@ -125,7 +130,7 @@ function setDNS() {
             $(".tbody-cdn-dns").html(arrText($('#cdn-data').data('c-dns')));
         }
         $(".refresh-cdn-dns svg").removeClass('refresh-click');
-    },100)
+    },sDNSTimeout)
 }
 
 function getDNS6() {
@@ -161,7 +166,7 @@ function setDNS6() {
             $(".tbody-cdn-dns6").html(arrText($('#cdn-data').data('c-dns6')));
         }
         $(".refresh-cdn-dns6 svg").removeClass('refresh-click');
-    },100)
+    },sDNS6Timeout)
 }
 
 function start() {
@@ -183,9 +188,7 @@ $(function (){
     })
     $(".refresh-cdn-cgi-trace svg").click(function () {
         $(this).addClass("refresh-click");
-        $.each(arrTrAlive,function (key,value) {
-            $('.trace-'+value).text('获取ing...');
-        })
+        $('.trace-tr').text('获取ing...');
         setTrace();
     })
     start();
