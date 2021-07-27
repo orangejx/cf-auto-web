@@ -8,7 +8,7 @@
 
 // 公共变量
 let domain          =   'cf-auto.0jn.net'; // 域名
-let url             =   '//'+domain+'/'; // URL
+let url             =   'https://'+domain+'/'; // URL
 let trace           =   '/cdn-cgi/trace'; // 当前 CDN Trace 数据
 let info            =   'info.php'; // 当前请求数据
 let node            =   'node.json'; // CDN 节点数据
@@ -100,7 +100,7 @@ function setTrace() {
 function getDNS() {
     // 查询 A 记录
     $.ajax({
-        url: '//dns.alidns.com/resolve?name='+domain+'&type=1',
+        url: 'https://dns.alidns.com/resolve?name='+domain+'&type=1',
         type: 'get',
         data: null,
         cache:false,
@@ -136,7 +136,7 @@ function setDNS() {
 function getDNS6() {
     // 查询 AAAA 记录
     $.ajax({
-        url: '//dns.alidns.com/resolve?name='+domain+'&type=28',
+        url: 'https://dns.alidns.com/resolve?name='+domain+'&type=28',
         type: 'get',
         data: null,
         cache:false,
