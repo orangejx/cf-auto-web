@@ -20,7 +20,11 @@ let sDNSTimeout     =   50; // setDNS Timeout [ms]
 let sDNS6Timeout    =   50; // setDNS6 Timeout [ms]
 let sTraceTimeout   =   100; // setTrace Timeout [ms]
 let inCN            =   true; // located in CN
-let addressDNS      =   inCN?'dns.alidns.com/resolve':'dns.ora.pub/dns-query';
+
+//get DNS Address
+function getDNSAddress(){
+    return inCN?'dns.alidns.com/resolve':'dns.ora.pub/dns-query';
+}
 
 function getNode() {
     // 获取 Cloudflare CDN 节点信息
@@ -77,7 +81,7 @@ function getTrace(){
         if ($('#cdn-data').data('cdn-cgi-trace')[value] == null || $('#cdn-data').data('cdn-cgi-trace')[value] == undefined)
             $('#cdn-data').data('cdn-cgi-trace')[value] = '获取失败~';
     })
-    // located in CN? 
+    // located in CN?
     if ($('#cdn-data').data('cdn-cgi-trace')['loc'] != 'CN')
         inCN  = false;
 
@@ -106,7 +110,7 @@ function setTrace() {
 function getDNS() {
     // 查询 A 记录
     $.ajax({
-        url: 'https://'+addressDNS+'?name='+domain+'&type=1',
+        url: 'https://'+getDNSAddress()+'?name='+domain+'&type=1',
         type: 'get',
         data: null,
         cache:false,
@@ -142,7 +146,7 @@ function setDNS() {
 function getDNS6() {
     // 查询 AAAA 记录
     $.ajax({
-        url: 'https://'+addressDNS+'?name='+domain+'&type=28',
+        url: 'https://'+getDNSAddress()+'?name='+domain+'&type=28',
         type: 'get',
         data: null,
         cache:false,
