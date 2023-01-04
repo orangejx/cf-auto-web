@@ -6,7 +6,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cloudflare CDN 加/减速节点</title>
+    <title>Cloudflare CDN Nodes Check</title>
 
     <!-- Bootstrap v4.6.0 -->
     <link rel="stylesheet" href="//cdn.wlms.dev/cdnjs/ajax/libs/bootstrap/4.6.0/css/bootstrap.min.css" integrity="sha512-P5MgMn1jBN01asBgU0z60Qk4QxiXo86+wlFahKrsQf37c9cro517WzVSPPV1tDKzhku2iJ2FVgL67wG03SGnNA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -24,13 +24,13 @@
         <div class="container title" style="margin: 2% auto;">
             <div class="row">
                 <div class="col align-self-center">
-                    <h1 class="text-center display-4">Cloudflare CDN 加/减速节点<br>(不保证速度)</h1>
+                    <h1 class="text-center display-4">Cloudflare CDN Nodes Check</h1>
                 </div>
             </div>
         </div>
         <div class="container cdn-dns" style="margin: 2% auto;">
-            <p class="h4">IPv4 解析情况
-                <span class="refresh refresh-cdn-dns" title="刷新">
+            <p class="h4">IPv4 Resolver
+                <span class="refresh refresh-cdn-dns" title="Reload">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/></svg>
                 </span>
             </p>
@@ -48,8 +48,8 @@
             </table>
         </div>
         <div class="container cdn-dns6" style="margin: 2% auto;">
-            <p class="h4">IPv6 解析情况
-                <span class="refresh refresh-cdn-dns6" title="刷新">
+            <p class="h4">IPv6 Resolver
+                <span class="refresh refresh-cdn-dns6" title="Reload">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/></svg>
                 </span>
             </p>
@@ -67,8 +67,8 @@
             </table>
         </div>
         <div class="container cdn-cgi-trace" style="margin: 2% auto;">
-            <p class="h4">当前CDN节点信息
-                <span class="refresh refresh-cdn-cgi-trace" title="刷新">
+            <p class="h4">Current CDN Node Info
+                <span class="refresh refresh-cdn-cgi-trace" title="Reload">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/></svg>
                 </span>
             </p>
@@ -81,27 +81,27 @@
                 </thead>
                 <tbody>
                 <tr class="display-flex">
-                    <th class="col-2">节点</th>
+                    <th class="col-2">Node</th>
                     <td class="col-10 trace-tr trace-colo">-</td>
                 </tr>
                 <tr class="display-flex">
-                    <th class="col-2">主机名</th>
+                    <th class="col-2">Host Name</th>
                     <td class="col-10 trace-tr trace-h">-</td>
                 </tr>
                 <tr class="display-flex">
-                    <th class="col-2">HTTP 版本</th>
+                    <th class="col-2">HTTP Version</th>
                     <td class="col-10 trace-tr trace-http">-</td>
                 </tr>
                 <tr class="display-flex">
-                    <th class="col-2">您的 IP 地址</th>
+                    <th class="col-2">Your IP Address</th>
                     <td class="col-10 trace-tr trace-ip">-</td>
                 </tr>
                 <tr class="display-flex">
-                    <th class="col-2">您的位置</th>
+                    <th class="col-2">Your Location</th>
                     <td class="col-10 trace-tr trace-loc">-</td>
                 </tr>
                 <tr class="display-flex">
-                    <th class="col-2">TLS 版本</th>
+                    <th class="col-2">TLS Version</th>
                     <td class="col-10 trace-tr trace-tls">-</td>
                 </tr>
                 <tr class="display-flex">
@@ -109,7 +109,7 @@
                     <td class="col-10 trace-tr trace-uag">-</td>
                 </tr>
                 <tr class="display-flex">
-                    <th class="col-2">访问协议</th>
+                    <th class="col-2">Access Protocol</th>
                     <td class="col-10 trace-tr trace-visit_scheme">-</td>
                 </tr>
                 <tr class="display-flex">
@@ -117,7 +117,7 @@
                     <td class="col-10 trace-tr trace-warp">-</td>
                 </tr>
                 <tr class="display-flex">
-                    <th class="col-2">回源 IP </th>
+                    <th class="col-2">Back to Source IP </th>
                     <td class="col-10 trace-tr info-REMOTE_ADDR">-</td>
                 </tr>
                 </tbody>
