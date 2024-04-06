@@ -97,12 +97,12 @@ function getTrace(){
 
 function setTrace() {
     getTrace();
-    getInfo();
+    // getInfo();
     setTimeout(function () {
         $.each(arrTrAlive,function (key,value) {
             $('.trace-'+value).text($('#cdn-data').data('cdn-cgi-trace')[value]);
         })
-        $('.info-REMOTE_ADDR').text($('#cdn-data').data('cdn-info')['REMOTE_ADDR']);
+        // $('.info-REMOTE_ADDR').text($('#cdn-data').data('cdn-info')['REMOTE_ADDR']);
         $(".refresh-cdn-cgi-trace svg").removeClass('refresh-click');
     },sTraceTimeout)
 }
